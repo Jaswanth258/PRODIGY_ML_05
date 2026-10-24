@@ -1,0 +1,14 @@
+torch
+torchvision
+transformers
+pillow
+flask
+flask-cors
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+opencv-python
+requests
+notebook

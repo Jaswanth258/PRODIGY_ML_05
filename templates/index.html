@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriScan - AI Food Recognition & Calorie Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-shrimp logo-icon"></i>
+                <h2>NutriScan<span>.ai</span></h2>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" id="nav-dashboard">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item" id="nav-logs">
+                    <i class="fa-solid fa-utensils"></i> Meal Logs
+                </a>
+                <a href="#" class="nav-item" id="nav-model">
+                    <i class="fa-solid fa-microchip"></i> Model Center
+                </a>
+            </nav>
+
+            <div class="user-card">
+                <div class="user-avatar">J</div>
+                <div class="user-info">
+                    <h4>Jaswanth</h4>
+                    <p>Daily Goal: 2,000 kcal</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Top Dashboard Stats Bar -->
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Dietary Dashboard</h1>
+                    <p>Track your calories and macronutrients instantly using AI</p>
+                </div>
+                <div class="date-display" id="current-date">
+                    Monday, July 13, 2026
+                </div>
+            </header>
+
+            <!-- Dashboard View -->
+            <div class="tab-content" id="dashboard-view">
+                <!-- Summary Stats Cards -->
+                <section class="stats-grid">
+                    <div class="stat-card glass">
+                        <div class="stat-icon cal"><i class="fa-solid fa-fire"></i></div>
+                        <div class="stat-details">
+                            <h3>Calories Logged</h3>
+                            <div class="stat-value"><span id="summary-calories">0</span> <small>kcal</small></div>
+                            <div class="stat-subtitle">Goal: 2000 kcal</div>
+                        </div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="stat-icon prot"><i class="fa-solid fa-egg"></i></div>
+                        <div class="stat-details">
+                            <h3>Protein</h3>
+                            <div class="stat-value"><span id="summary-protein">0</span> <small>g</small></div>
+                            <div class="stat-subtitle">Target: 120g</div>
+                        </div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="stat-icon carb"><i class="fa-solid fa-wheat-awn"></i></div>
+                        <div class="stat-details">
+                            <h3>Carbs</h3>
+                            <div class="stat-value"><span id="summary-carbs">0</span> <small>g</small></div>
+                            <div class="stat-subtitle">Target: 230g</div>
+                        </div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="stat-icon fat"><i class="fa-solid fa-cheese"></i></div>
+                        <div class="stat-details">
+                            <h3>Fats</h3>
+                            <div class="stat-value"><span id="summary-fats">0</span> <small>g</small></div>
+                            <div class="stat-subtitle">Target: 65g</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Core Scanner and Tracker Layout -->
+                <div class="workspace-grid">
+                    <!-- Left: Upload/Scan Section -->
+                    <section class="scanner-section glass">
+                        <div class="section-header">
+                            <h2><i class="fa-solid fa-camera"></i> Food Scanner</h2>
+                            <div class="model-toggle-container">
+                                <label for="model-select">AI Engine:</label>
+                                <select id="model-select" class="glass-select">
+                                    <option value="custom">Custom ML (4 classes: Apple, Burger, Pizza, Salad)</option>
+                                    <option value="vit" selected>Vision Transformer (101 Food-101 classes)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Upload Zone -->
+                        <div class="upload-zone" id="drop-zone">
+                            <input type="file" id="file-input" accept="image/*" style="display: none;">
+                            
+                            <div class="upload-prompt" id="upload-prompt">
+                                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                                <h3>Drag & Drop food image</h3>
+                                <p>or click to browse from device</p>
+                                <div class="upload-actions">
+                                    <button class="btn btn-secondary btn-sm" id="btn-webcam">
+                                        <i class="fa-solid fa-video"></i> Use Webcam
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Preview container -->
+                            <div class="preview-container" id="preview-container" style="display: none;">
+                                <img id="image-preview" src="#" alt="Food Preview">
+                                <div class="preview-overlay">
+                                    <button class="btn btn-danger btn-circle" id="btn-clear-image" title="Remove image">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Webcam feed container -->
+                            <div class="webcam-container" id="webcam-container" style="display: none;">
+                                <video id="webcam-video" autoplay playsinline></video>
+                                <div class="webcam-controls">
+                                    <button class="btn btn-primary" id="btn-capture">
+                                        <i class="fa-solid fa-camera"></i> Capture
+                                    </button>
+                                    <button class="btn btn-secondary" id="btn-cancel-webcam">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="scan-action-bar">
+                            <button class="btn btn-gradient btn-full" id="btn-analyze" disabled>
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Food Item
+                            </button>
+                        </div>
+
+                        <!-- Progress / Status Indicator -->
+                        <div class="analysis-status" id="analysis-status" style="display: none;">
+                            <div class="spinner"></div>
+                            <p id="status-text">Uploading image and running AI inference...</p>
+                        </div>
+                    </section>
+
+                    <!-- Right: Results & Nutrition Details -->
+                    <section class="results-section glass" id="results-panel">
+                        <!-- Empty State -->
+                        <div class="results-empty" id="results-empty">
+                            <i class="fa-solid fa-heart-pulse heartbeat-icon"></i>
+                            <h3>Awaiting Analysis</h3>
+                            <p>Upload a food image and click Analyze to view calories, macronutrients, and dietitian advice.</p>
+                        </div>
+
+                        <!-- Actual Results Dashboard -->
+                        <div class="results-content" id="results-content" style="display: none;">
+                            <div class="result-header">
+                                <div>
+                                    <h2 id="result-food-name">Pizza</h2>
+                                    <div class="badge-row">
+                                        <span class="badge" id="badge-model">Vision Transformer</span>
+                                        <span class="badge" id="badge-confidence">Confidence: 94.5%</span>
+                                    </div>
+                                </div>
+                                <div class="result-calories-bubble">
+                                    <span id="result-calories">345</span>
+                                    <label>kcal</label>
+                                </div>
+                            </div>
+
+                            <!-- Portion adjuster -->
+                            <div class="portion-adjuster glass-card">
+                                <h4>Portion Weight Calculator</h4>
+                                <div class="adjuster-controls">
+                                    <button class="adjust-btn minus" id="btn-portion-minus">-</button>
+                                    <input type="number" id="portion-weight" value="100" min="10" max="1000">
+                                    <span>grams (g)</span>
+                                    <button class="adjust-btn plus" id="btn-portion-plus">+</button>
+                                </div>
+                                <p class="standard-ref">Standard serving: <span id="ref-portion-desc">1 Slice (125g)</span></p>
+                            </div>
+
+                            <!-- Nutrients Breakdown -->
+                            <div class="macros-breakdown">
+                                <h3>Macronutrient Summary</h3>
+                                <div class="macros-rings">
+                                    <div class="macro-ring-item">
+                                        <div class="progress-ring-container">
+                                            <svg class="progress-ring" width="80" height="80">
+                                                <circle class="progress-ring-bg" stroke="#1f2c3f" stroke-width="6" fill="transparent" r="34" cx="40" cy="40"/>
+                                                <circle class="progress-ring-bar" id="ring-protein" stroke="var(--protein-color)" stroke-width="6" fill="transparent" r="34" cx="40" cy="40"/>
+                                            </svg>
+                                            <div class="ring-value" id="ring-val-protein">12g</div>
+                                        </div>
+                                        <label>Protein</label>
+                                    </div>
+                                    
+                                    <div class="macro-ring-item">
+                                        <div class="progress-ring-container">
+                                            <svg class="progress-ring" width="80" height="80">
+                                                <circle class="progress-ring-bg" stroke="#1f2c3f" stroke-width="6" fill="transparent" r="34" cx="40" cy="40"/>
+                                                <circle class="progress-ring-bar" id="ring-carbs" stroke="var(--carbs-color)" stroke-width="6" fill="transparent" r="34" cx="40" cy="40"/>
+                                            </svg>
+                                            <div class="ring-value" id="ring-val-carbs">34g</div>
+                                        </div>
+                                        <label>Carbs</label>
+                                    </div>
+                                    
+                                    <div class="macro-ring-item">
+                                        <div class="progress-ring-container">
+                                            <svg class="progress-ring" width="80" height="80">
+                                                <circle class="progress-ring-bg" stroke="#1f2c3f" stroke-width="6" fill="transparent" r="34" cx="40" cy="40"/>
+                                                <circle class="progress-ring-bar" id="ring-fats" stroke="var(--fats-color)" stroke-width="6" fill="transparent" r="34" cx="40" cy="40"/>
+                                            </svg>
+                                            <div class="ring-value" id="ring-val-fats">15g</div>
+                                        </div>
+                                        <label>Fats</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dietary Suggestion -->
+                            <div class="dietitian-tip">
+                                <div class="tip-icon"><i class="fa-solid fa-user-doctor"></i></div>
+                                <div class="tip-content">
+                                    <h4>Dietitian Suggestion</h4>
+                                    <p id="result-diet-tip">Add vegetable toppings to boost fiber and micronutrients.</p>
+                                </div>
+                            </div>
+
+                            <!-- Add to log buttons -->
+                            <div class="result-actions">
+                                <button class="btn btn-primary btn-full" id="btn-add-log">
+                                    <i class="fa-solid fa-plus"></i> Add to Daily Meal Log
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Meal Logs View (Tab) -->
+            <div class="tab-content" id="logs-view" style="display: none;">
+                <div class="logs-container glass">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-list-check"></i> Today's Meal Journal</h2>
+                        <button class="btn btn-danger btn-sm" id="btn-clear-logs">
+                            <i class="fa-solid fa-trash-can"></i> Clear All Logs
+                        </button>
+                    </div>
+
+                    <div class="logs-summary-bar">
+                        <div class="summary-metric">
+                            <span id="log-total-calories">0</span> / 2000 kcal
+                            <label>Calories consumed</label>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" id="log-calories-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="logs-table">
+                            <thead>
+                                <tr>
+                                    <th>Food Item</th>
+                                    <th>Model Engine</th>
+                                    <th>Portion (g)</th>
+                                    <th>Protein (g)</th>
+                                    <th>Carbs (g)</th>
+                                    <th>Fats (g)</th>
+                                    <th>Calories (kcal)</th>
+                                    <th>Timestamp</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-table-body">
+                                <!-- Loaded dynamically -->
+                                <tr class="no-logs">
+                                    <td colspan="9" style="text-align: center; padding: 40px 0; color: #8a99ad;">
+                                        <i class="fa-solid fa-utensils" style="font-size: 32px; margin-bottom: 12px; display: block; opacity: 0.5;"></i>
+                                        No meals logged for today. Scan food items to add them here!
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Center View (Tab) -->
+            <div class="tab-content" id="model-view" style="display: none;">
+                <div class="model-center-grid">
+                    <!-- Custom ML Stats -->
+                    <div class="model-card glass">
+                        <div class="card-icon"><i class="fa-solid fa-gears"></i></div>
+                        <h2>Custom Shallow ML Pipeline</h2>
+                        <p class="model-description">
+                            Uses custom feature engineering (concatenation of BGR Color Histograms and Histogram of Oriented Gradients (HOG) shapes) to classify food items. Compares GBDT, Random Forest, and SVM models.
+                        </p>
+                        
+                        <div class="model-stats">
+                            <div class="metric-row">
+                                <span>Trained Classes:</span>
+                                <strong>4 (Apple, Burger, Pizza, Salad)</strong>
+                            </div>
+                            <div class="metric-row">
+                                <span>Training set:</span>
+                                <strong>96 Images</strong>
+                            </div>
+                            <div class="metric-row">
+                                <span>Testing set:</span>
+                                <strong>24 Images</strong>
+                            </div>
+                            <div class="metric-row">
+                                <span>Best Model Status:</span>
+                                <span class="status-badge" id="custom-model-status">Checking...</span>
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            <button class="btn btn-primary" id="btn-retrain">
+                                <i class="fa-solid fa-arrows-rotate"></i> Retrain Model Pipeline
+                            </button>
+                        </div>
+                        <div class="retrain-progress" id="retrain-progress" style="display: none;">
+                            <div class="spinner"></div>
+                            <p id="retrain-status-text">Preparing data and running model comparison...</p>
+                        </div>
+                    </div>
+
+                    <!-- Vision Transformer Stats -->
+                    <div class="model-card glass">
+                        <div class="card-icon"><i class="fa-solid fa-brain"></i></div>
+                        <h2>Vision Transformer (ViT-Base)</h2>
+                        <p class="model-description">
+                            A high-parameter Deep Learning ViT architecture fine-tuned on the full Food-101 dataset (containing 101,000 images across 101 food classes). Demonstrates advanced visual understanding.
+                        </p>
+                        
+                        <div class="model-stats">
+                            <div class="metric-row">
+                                <span>Model Architecture:</span>
+                                <strong>ViT-base-patch16-224</strong>
+                            </div>
+                            <div class="metric-row">
+                                <span>Supported Classes:</span>
+                                <strong>101 Food categories</strong>
+                            </div>
+                            <div class="metric-row">
+                                <span>Loaded Status:</span>
+                                <span class="status-badge" id="vit-model-status">Checking...</span>
+                            </div>
+                        </div>
+
+                        <div class="vit-download-status" id="vit-download-info" style="display: none;">
+                            <div class="info-alert">
+                                <i class="fa-solid fa-circle-info"></i>
+                                <span>ViT loads asynchronously on startup. The first inference may take 20-30 seconds to fetch weights.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
